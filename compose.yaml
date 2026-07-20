@@ -1,0 +1,14 @@
+services:
+  pi:
+    image: ${IMAGE_PREFIX:-docker.io}/agent/pi
+    environment:
+      PI_SKIP_VERSION_CHECK: 1
+      PI_OFFLINE: 1
+    env_file:
+      - .env
+    volumes:
+      - ./models.json:/root/.pi/agent/models.json
+      - ./settings.json:/root/.pi/agent/settings.json
+      - ./mcp.json:/root/.pi/agent/mcp.json
+    entrypoint:
+      - pi
