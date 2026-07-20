@@ -2,18 +2,9 @@ FROM node:24-trixie AS builder
 
 WORKDIR /src
 
-RUN apt update && apt install -y --no-install-recommends git upx
+RUN npm install -g --ignore-scripts @earendil-works/pi-coding-agent
 
-RUN npm install -g bun
-
-RUN git clone --depth 1 --branch main https://github.com/earendil-works/pi.git .
-
-RUN npm install --ignore-scripts
-
-RUN cd packages/coding-agent && npm run build:binary \
-    && upx --best --lzma /src/packages/coding-agent/dist/pi
-
-RUN /src/packages/coding-agent/dist/pi install npm:pi-mcp-adapter
+RUN pi install npm:pi-mcp-adapter
 
 FROM cgr.dev/chainguard/wolfi-base AS runtime
 
@@ -23,14 +14,12 @@ WORKDIR /workspace
 
 COPY AGENTS.md README.md /workspace/
 
-COPY --from=builder /src/packages/coding-agent/dist/pi /workspace/pi
-COPY --from=builder /src/packages/coding-agent/dist/assets /workspace/assets
-COPY --from=builder /src/packages/coding-agent/dist/theme /workspace/theme
-COPY --from=builder /src/packages/coding-agent/dist/photon_rs_bg.wasm /workspace/photon_rs_bg.wasm
-COPY --from=builder /src/packages/coding-agent/dist/export-html /workspace/export-html
+COPY --from=builder /usr/local/lib/node_modules /usr/local/lib/node_modules
 COPY --from=builder /root/.pi/agent/npm /root/.pi/agent/npm
 
-RUN ln -sf /workspace/pi /usr/sbin/pi
+RUN ln -sf /usr/local/lib/node_modules/npm/bin/npx-cli.js /usr/sbin/npx \
+    && ln -sf /usr/local/lib/node_modules/npm/bin/npm-cli.js /usr/sbin/npm \
+    && ln -sf /usr/local/lib/node_modules/@earendil-works/pi-coding-agent/dist/cli.js /usr/sbin/pi
 
 ENV TZ=UTC
 
