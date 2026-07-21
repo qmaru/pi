@@ -12,10 +12,11 @@ RUN apk add --no-cache nodejs-24-minimal ca-certificates tzdata fontconfig fd ri
 
 WORKDIR /workspace
 
-COPY AGENTS.md README.md /workspace/
-
 COPY --from=builder /usr/local/lib/node_modules /usr/local/lib/node_modules
 COPY --from=builder /root/.pi/agent/npm /root/.pi/agent/npm
+
+COPY prompts/AGENTS.md prompts/README.md /workspace/
+COPY skills/ /workspace/.agents/skills/
 
 RUN ln -sf /usr/local/lib/node_modules/npm/bin/npx-cli.js /usr/sbin/npx \
     && ln -sf /usr/local/lib/node_modules/npm/bin/npm-cli.js /usr/sbin/npm \

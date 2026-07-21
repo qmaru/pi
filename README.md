@@ -1,27 +1,6 @@
-# Runtime Environment
+# pi
 
-## Operating System
+This is a lightweight pi agent.
 
-- Wolfi Linux (apk package manager)
-
-## Shell
-
-- POSIX shell
-- BusyBox utilities
-
-## Runtime
-
-- Node.js 24 (minimal)
-- No npm
-
-## Available Commands
-
-- node
-- fd
-- rg
-
-## Installed Packages
-
-- ca-certificates
-- tzdata
-- fontconfig
++ skills-first
++ docker only
