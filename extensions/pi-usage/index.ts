@@ -6,7 +6,7 @@ function formatTokens(n: number) {
 }
 
 function formatUsage(usage: any) {
-  return `\n💰 ${formatTokens(usage.input)} in / ${formatTokens(usage.output)} out / $${usage.cost.total.toFixed(6)}`;
+  return `\n💰 ${formatTokens(usage.input)} in / ${formatTokens(usage.output)} out / ${formatTokens(usage.cache?.read ?? 0)} cr / $${usage.cost.total.toFixed(6)}`;
 }
 
 export default function (pi: any) {
