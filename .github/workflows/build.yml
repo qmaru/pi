@@ -2,6 +2,12 @@ name: container
 
 on:
   push:
+    paths-ignore:
+      - "compose.yaml"
+      - ".gitignore"
+      - ".env.example"
+      - "README.md"
+      - "examples/**"
     branches: [main]
   workflow_dispatch:
     inputs:
