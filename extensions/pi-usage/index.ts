@@ -1,15 +1,31 @@
 import { writeFileSync } from "node:fs";
 
+function formatTokens(n: number) {
+  if (n >= 1000) return `${(n / 1000).toFixed(1)}k`;
+  return String(n);
+}
+
+function formatUsage(usage: any) {
+  return `\n💰 ${formatTokens(usage.input)} in / ${formatTokens(usage.output)} out / $${usage.cost.total.toFixed(6)}`;
+}
+
 export default function (pi: any) {
   console.error("[pi-usage] loaded");
 
   const usageFile = process.env.PI_USAGE_FILE;
+  const usageStdout = process.env.PI_USAGE_STDOUT === "1";
 
-  if (!usageFile) {
+  if (!usageFile && !usageStdout) {
     return;
   }
 
-  console.error(`[pi-usage] enabled: ${usageFile}`);
+  if (usageFile) {
+    console.error(`[pi-usage] file enabled: ${usageFile}`);
+  }
+
+  if (usageStdout) {
+    console.error("[pi-usage] stdout enabled");
+  }
 
   let lastUsage: any = null;
 
@@ -22,8 +38,14 @@ export default function (pi: any) {
   });
 
   process.on("exit", () => {
-    if (!lastUsage) return
+    if (!lastUsage) return;
 
-    writeFileSync(usageFile, JSON.stringify(lastUsage, null, 2));
+    if (usageFile) {
+      writeFileSync(usageFile, JSON.stringify(lastUsage, null, 2));
+    }
+
+    if (usageStdout) {
+      console.log(formatUsage(lastUsage));
+    }
   });
 }
