@@ -51,7 +51,7 @@ jobs:
         with:
           cache-from: type=gha,scope=pi
           cache-to: type=gha,scope=pi,mode=max
-          no-cache: ${{ inputs.force }}
+          no-cache: ${{ github.event_name == 'workflow_dispatch' && inputs.force }}
           context: .
           platforms: linux/amd64,linux/arm64
           target: pi-base
@@ -65,7 +65,7 @@ jobs:
         with:
           cache-from: type=gha,scope=pi
           cache-to: type=gha,scope=pi,mode=max
-          no-cache: ${{ inputs.force }}
+          no-cache: ${{ github.event_name == 'workflow_dispatch' && inputs.force }}
           context: .
           platforms: linux/amd64,linux/arm64
           target: pi-full
