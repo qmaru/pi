@@ -8,6 +8,7 @@ on:
       - ".env.example"
       - "README.md"
       - "examples/**"
+      - "extensions/**"
     branches: [main]
   workflow_dispatch:
     inputs:

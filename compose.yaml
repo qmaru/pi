@@ -10,5 +10,6 @@ services:
       - ./examples/models.json:/root/.pi/agent/models.json
       - ./examples/settings.json:/root/.pi/agent/settings.json
       - ./examples/mcp.json:/root/.pi/agent/mcp.json
+      - ./extensions/pi-usage:/root/.pi/agent/extensions/pi-usage
     entrypoint:
       - pi
