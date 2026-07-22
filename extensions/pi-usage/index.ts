@@ -5,12 +5,20 @@ function formatTokens(n: number) {
   return String(n);
 }
 
-function formatUsage(usage: any) {
+function formatUsageText(usage: any) {
   return [
-    `💰 ${formatTokens(usage.totalTokens)} tokens / $${usage.cost.total.toFixed(6)}`,
-    `in ${formatTokens(usage.input)} / out ${formatTokens(usage.output)} / reasoning ${formatTokens(usage.reasoning)}`,
-    `cache read ${formatTokens(usage.cacheRead)} / write ${formatTokens(usage.cacheWrite ?? 0)}`,
-  ].join("\n");
+    `💰 $${usage?.cost.total.toFixed(6)} · ${formatTokens(usage?.totalTokens || 0)} tokens`,
+    `Input ${formatTokens(usage?.input || 0)} Output ${formatTokens(usage?.output || 0)} Reasoning ${formatTokens(usage?.reasoning || 0)}`,
+    `Cache RW ${formatTokens(usage?.cacheRead || 0)} · ${formatTokens(usage?.cacheWrite ?? 0)}`,
+  ].join("\n\n");
+}
+
+function formatUsageMarkdown(usage: any): string {
+  return [
+    `💰 **$${usage?.cost.total.toFixed(6)}** · **${formatTokens(usage?.totalTokens || 0)} tokens**`,
+    `**Input** ${formatTokens(usage?.input || 0)} **Output** ${formatTokens(usage?.output || 0)} **Reasoning** ${formatTokens(usage?.reasoning || 0)}`,
+    `**Cache RW** ${formatTokens(usage?.cacheRead || 0)} · ${formatTokens(usage?.cacheWrite || 0)}`,
+  ].join("\n\n")
 }
 
 export default function (pi: any) {
@@ -18,6 +26,7 @@ export default function (pi: any) {
 
   const usageFile = process.env.PI_USAGE_FILE;
   const usageStdout = process.env.PI_USAGE_STDOUT === "1";
+  const usageMarkdown = process.env.PI_USAGE_MARKDOWN === "1";
 
   if (!usageFile && !usageStdout) {
     return;
@@ -49,7 +58,11 @@ export default function (pi: any) {
     }
 
     if (usageStdout) {
-      console.log("\n" + formatUsage(lastUsage));
+      if (usageMarkdown) {
+        console.log("\n" + formatUsageMarkdown(lastUsage));
+      } else {
+        console.log("\n" + formatUsageText(lastUsage));
+      }
     }
   });
 }
