@@ -15,7 +15,7 @@ ENV PATH="/usr/local/lib/node_modules/.bin:${PATH}"
 ENV TZ=UTC
 
 COPY prompts/AGENTS.md prompts/README.md /workspace/
-COPY skills/ /workspace/.agents/skills/
+COPY skills/ /root/.pi/agent/skills/
 
 FROM runtime AS pi-base
 
