@@ -1,0 +1,44 @@
+name: Keep Repo Alive (branch)
+
+on:
+  schedule:
+    - cron: "0 3 */30 * *"
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  keepalive:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout (main)
+        uses: actions/checkout@v7
+        with:
+          fetch-depth: 0
+
+      - name: Switch to keepalive branch
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+
+          if git show-ref --quiet refs/remotes/origin/keepalive; then
+            git checkout keepalive
+          else
+            git checkout -b keepalive
+          fi
+
+      - name: Update keepalive file
+        run: |
+          echo "Last keepalive: $(date -u)" > .keepalive
+
+      - name: Commit and push if changed
+        run: |
+          git add .keepalive
+
+          if git diff --cached --quiet; then
+            echo "No changes to commit"
+          else
+            git commit -m "chore: keep repo alive (branch)"
+            git push -u origin keepalive
+          fi

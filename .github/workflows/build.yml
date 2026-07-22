@@ -16,6 +16,8 @@ on:
         description: Force rebuild
         type: boolean
         default: false
+  schedule:
+    - cron: "0 2 * * 1"
 
 permissions:
   contents: read
@@ -25,8 +27,57 @@ env:
   IMAGE: ghcr.io/${{ github.repository_owner }}/agent/pi
 
 jobs:
+  check:
+    name: Check npm version
+    runs-on: ubuntu-latest
+
+    outputs:
+      update_needed: ${{ steps.compare.outputs.update_needed }}
+
+    steps:
+      - uses: actions/checkout@v7
+
+      - name: Restore npm version cache
+        uses: actions/cache/restore@v6
+        with:
+          path: .pi_version
+          key: pi-version
+
+      - name: Get npm version
+        id: npm
+        run: |
+          VERSION=$(npm view @earendil-works/pi-coding-agent version)
+
+          echo "version=$VERSION" >> "$GITHUB_OUTPUT"
+
+      - name: Compare version
+        id: compare
+        run: |
+          PREV_VERSION=""
+
+          if [ -f .pi_version ]; then
+            PREV_VERSION=$(cat .pi_version)
+          fi
+
+          if [ "$PREV_VERSION" = "${{ steps.npm.outputs.version }}" ]; then
+            echo "update_needed=false" >> "$GITHUB_OUTPUT"
+          else
+            echo "update_needed=true" >> "$GITHUB_OUTPUT"
+            echo "${{ steps.npm.outputs.version }}" > .pi_version
+          fi
+
+      - name: Save version cache
+        if: steps.compare.outputs.update_needed == 'true'
+        uses: actions/cache/save@v6
+        with:
+          path: .pi_version
+          key: pi-version
+
   build:
     name: Build and push
+    needs: check
+    if: needs.check.outputs.update_needed == 'true' || github.event.inputs.force == 'true'
+
     runs-on: ubuntu-latest
 
     steps:
@@ -60,7 +111,6 @@ jobs:
             ${{ env.IMAGE }}:base
           push: true
 
-
       - name: Build and push latest
         uses: docker/build-push-action@v7
         with:
@@ -78,3 +128,13 @@ jobs:
         run: |
           docker buildx imagetools inspect $IMAGE:base
           docker buildx imagetools inspect $IMAGE:latest
+
+  skipped:
+    name: Skip
+    needs: check
+    if: needs.check.outputs.update_needed != 'true' && github.event.inputs.force != 'true'
+
+    runs-on: ubuntu-latest
+
+    steps:
+      - run: echo "🚫 No npm package update detected, build skipped."
