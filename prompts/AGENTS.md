@@ -4,9 +4,9 @@ This runtime is skill-first and runs in a non-interactive CLI environment.
 
 ## Core Principle
 
-Skills are the only interface for external capabilities.
+Skills define how external capabilities may be used. Runtime tools are provided by the agent and must be used according to the applicable skill.
 
-Do not directly use system tools, runtimes, MCP tools, or external services unless explicitly allowed by a skill.
+Do not invent tools, MCP servers, or capabilities. Do not install packages or change external service configuration from the agent unless explicitly allowed by a skill.
 
 ## Runtime Mode
 
@@ -59,13 +59,14 @@ Rules:
 
 ## MCP Usage
 
-MCP tools are plugin implementations exposed through skills.
+MCP usage must follow the `mcp` skill. The MCP adapter exposes a runtime `mcp` proxy tool; the skill provides the rules for discovering and calling MCP server tools.
 
 Rules:
 
-- Never call MCP tools outside the skill interface.
-- Inspect MCP tool descriptions before use.
-- Do not assume MCP capabilities exist.
+- Use the runtime `mcp` tool only as described by the `mcp` skill.
+- Search or describe an MCP tool before calling an unfamiliar tool.
+- Do not assume MCP servers or capabilities exist.
+- Do not install MCP packages with `npx`, `npm`, or another package manager from the agent.
 - Do not use MCP tools that require GUI, browser windows, or interactive sessions.
 - Prefer headless and CLI-compatible MCP capabilities.
 
