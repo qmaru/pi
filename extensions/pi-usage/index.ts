@@ -6,7 +6,11 @@ function formatTokens(n: number) {
 }
 
 function formatUsage(usage: any) {
-  return `\n💰 ${formatTokens(usage.input)} in / ${formatTokens(usage.output)} out / ${formatTokens(usage.cache?.read ?? 0)} cr / $${usage.cost.total.toFixed(6)}`;
+  return [
+    `💰 ${formatTokens(usage.totalTokens)} tokens / $${usage.cost.total.toFixed(6)}`,
+    `in ${formatTokens(usage.input)} / out ${formatTokens(usage.output)} / reasoning ${formatTokens(usage.reasoning)}`,
+    `cache read ${formatTokens(usage.cacheRead)} / write ${formatTokens(usage.cacheWrite ?? 0)}`,
+  ].join("\n");
 }
 
 export default function (pi: any) {
@@ -45,7 +49,7 @@ export default function (pi: any) {
     }
 
     if (usageStdout) {
-      console.log(formatUsage(lastUsage));
+      console.log("\n" + formatUsage(lastUsage));
     }
   });
 }
