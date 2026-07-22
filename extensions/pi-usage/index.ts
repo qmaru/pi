@@ -59,9 +59,9 @@ export default function (pi: any) {
 
     if (usageStdout) {
       if (usageMarkdown) {
-        console.log("\n" + formatUsageMarkdown(lastUsage));
+        console.log("\n---\n" + formatUsageMarkdown(lastUsage));
       } else {
-        console.log("\n" + formatUsageText(lastUsage));
+        console.log("\n\n" + formatUsageText(lastUsage));
       }
     }
   });
