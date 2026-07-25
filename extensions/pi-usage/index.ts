@@ -27,6 +27,7 @@ export default function (pi: any) {
   const usageFile = process.env.PI_USAGE_FILE;
   const usageStdout = process.env.PI_USAGE_STDOUT === "1";
   const usageMarkdown = process.env.PI_USAGE_MARKDOWN === "1";
+  let modelId: string | undefined;
 
   if (!usageFile && !usageStdout) {
     return;
@@ -42,7 +43,9 @@ export default function (pi: any) {
 
   let lastUsage: any = null;
 
-  pi.on("message_end", (event: any) => {
+  pi.on("message_end", (event: any, ctx: any) => {
+    modelId = ctx?.model?.id;
+
     const message = event.message;
 
     if (message.role === "assistant" && message.usage) {
@@ -58,11 +61,13 @@ export default function (pi: any) {
     }
 
     if (usageStdout) {
+      let output = "";
       if (usageMarkdown) {
-        console.log("\n---\n" + formatUsageMarkdown(lastUsage));
+        output = "\n---\n" + formatUsageMarkdown(lastUsage);
       } else {
-        console.log("\n\n" + formatUsageText(lastUsage));
+        output = "\n\n" + formatUsageText(lastUsage);
       }
+      console.log(output + (modelId ? `\n\n[\`${modelId}\`]` : ""));
     }
   });
 }
