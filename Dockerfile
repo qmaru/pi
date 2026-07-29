@@ -3,7 +3,7 @@ FROM node:24-trixie AS base
 WORKDIR /src
 
 RUN npm install -g --ignore-scripts @earendil-works/pi-coding-agent \
-    && pi install npm:pi-mcp-adapter
+    && pi install npm:pi-mcp-extension
 
 FROM cgr.dev/chainguard/wolfi-base AS runtime
 
