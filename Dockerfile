@@ -5,6 +5,16 @@ WORKDIR /src
 RUN npm install -g --ignore-scripts @earendil-works/pi-coding-agent \
     && pi install npm:pi-mcp-extension
 
+RUN PKG="$(npm root -g)/@earendil-works/pi-coding-agent" \
+    && find "$PKG" -type f \( -name "*.map" -o -name "*.d.ts" \) -delete \
+    && rm -rf "$PKG/docs" "$PKG/examples" "$PKG/CHANGELOG.md" \
+    "$PKG/node_modules/@mistralai" \
+    "$PKG/node_modules/@aws-sdk" \
+    "$PKG/node_modules/@aws" \
+    "$PKG/node_modules/@aws-crypto" \
+    "$PKG/node_modules/@opentelemetry" \
+    && npm cache clean --force
+
 FROM cgr.dev/chainguard/wolfi-base AS runtime
 
 RUN apk add --no-cache nodejs-24-minimal bash ca-certificates tzdata fontconfig fd ripgrep
