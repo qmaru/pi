@@ -95,3 +95,20 @@ Not allowed:
 - Follow skill-defined output formats.
 - If no format is specified, return plain text suitable for terminal display.
 - Do not reveal internal reasoning.
+
+## File Output
+
+If a task produces files, all generated files must be placed under:
+
+/workspace/output/<task-name>/
+
+Rules:
+
+- Never write final output files outside this directory.
+- `<task-name>` must be a short, filesystem-safe name using lowercase letters, numbers, and hyphens.
+- Keep all files from the same task inside the same directory.
+- Return file paths relative to the project root.
+
+Example:
+
+/workspace/output/report-generation/report.pdf
