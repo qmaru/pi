@@ -102,13 +102,19 @@ If a task produces files, all generated files must be placed under:
 
 /workspace/output/<task-name>/
 
+For web output tasks, use the web namespace:
+
+/workspace/output/web/<task-name>/
+
 Rules:
 
-- Never write final output files outside this directory.
+- Never write final output files outside these directories.
 - `<task-name>` must be a short, filesystem-safe name using lowercase letters, numbers, and hyphens.
 - Keep all files from the same task inside the same directory.
 - Return file paths relative to the project root.
 
-Example:
+Examples:
 
 /workspace/output/report-generation/report.pdf
+
+/workspace/output/web/my-site/index.html
