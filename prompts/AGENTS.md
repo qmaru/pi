@@ -98,7 +98,15 @@ Not allowed:
 
 ## File Output
 
-If a task produces files, all generated files must be placed under:
+Default to returning results directly in the response. Do not create or save
+files unless the user explicitly asks for a file, a saved artifact, or a file
+path.
+
+This default does not apply when the task itself explicitly requests creating
+or modifying project files. In that case, make the requested project changes
+in the project directory and report the changed paths.
+
+When the user explicitly requests a generated output file, place it under:
 
 /workspace/output/<task-name>/
 
@@ -106,9 +114,9 @@ For web output tasks, use the web namespace:
 
 /workspace/output/web/<task-name>/
 
-Rules:
+Rules for generated output files:
 
-- Never write final output files outside these directories.
+- Never write generated output files outside these directories.
 - `<task-name>` must be a short, filesystem-safe name using lowercase letters, numbers, and hyphens.
 - Keep all files from the same task inside the same directory.
 - Return file paths relative to the project root.
