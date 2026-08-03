@@ -66,10 +66,11 @@ export default function (pi: any) {
       let output = "";
       if (usageMarkdown) {
         output = "\n---\n" + formatUsageMarkdown(lastUsage);
+        console.log(output + (modelId ? `\n\n**Model** \`${modelId}\`` + (sessId ? `\n\n**Session** \`${sessId}\`` : "") : ""));
       } else {
         output = "\n\n" + formatUsageText(lastUsage);
+        console.log(output + (modelId ? `\n\nModel ${modelId}` + (sessId ? `\n\nSession ${sessId}` : "") : ""));
       }
-      console.log(output + (modelId ? `\n\n[\`${modelId}\`]` + (sessId ? `\n\n[session-\`${sessId}\`]` : "") : ""));
     }
   });
 }
