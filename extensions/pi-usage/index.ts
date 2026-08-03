@@ -28,6 +28,7 @@ export default function (pi: any) {
   const usageStdout = process.env.PI_USAGE_STDOUT === "1";
   const usageMarkdown = process.env.PI_USAGE_MARKDOWN === "1";
   let modelId: string | undefined;
+  let sessId: string | undefined;
 
   if (!usageFile && !usageStdout) {
     return;
@@ -45,6 +46,7 @@ export default function (pi: any) {
 
   pi.on("message_end", (event: any, ctx: any) => {
     modelId = ctx?.model?.id;
+    sessId = ctx.sessionManager?.sessionId;
 
     const message = event.message;
 
@@ -67,7 +69,7 @@ export default function (pi: any) {
       } else {
         output = "\n\n" + formatUsageText(lastUsage);
       }
-      console.log(output + (modelId ? `\n\n[\`${modelId}\`]` : ""));
+      console.log(output + (modelId ? `\n\n[\`${modelId}\`]` + (sessId ? `\n[sess-\`${sessId}\`]` : "") : ""));
     }
   });
 }
