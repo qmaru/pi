@@ -69,7 +69,7 @@ export default function (pi: any) {
       } else {
         output = "\n\n" + formatUsageText(lastUsage);
       }
-      console.log(output + (modelId ? `\n\n[\`${modelId}\`]` + (sessId ? `\n[sess-\`${sessId}\`]` : "") : ""));
+      console.log(output + (modelId ? `\n\n[\`${modelId}\`]` + (sessId ? `\n[\`sess-${sessId}\`]` : "") : ""));
     }
   });
 }
