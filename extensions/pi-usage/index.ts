@@ -1,19 +1,21 @@
-import { writeFileSync } from "node:fs";
+/// <reference path="../types/globals.d.ts" />
+import type { ExtensionAPI, ExtensionContext, Usage } from "@earendil-works/pi-coding-agent"
+import { writeFileSync } from "node:fs"
 
 function formatTokens(n: number) {
-  if (n >= 1000) return `${(n / 1000).toFixed(1)}k`;
-  return String(n);
+  if (n >= 1000) return `${(n / 1000).toFixed(1)}k`
+  return String(n)
 }
 
-function formatUsageText(usage: any) {
+function formatUsageText(usage: Usage) {
   return [
     `💰 $${usage?.cost.total.toFixed(6)} · ${formatTokens(usage?.totalTokens || 0)} tokens`,
     `Input ${formatTokens(usage?.input || 0)} Output ${formatTokens(usage?.output || 0)} Reasoning ${formatTokens(usage?.reasoning || 0)}`,
     `Cache RW ${formatTokens(usage?.cacheRead || 0)} · ${formatTokens(usage?.cacheWrite ?? 0)}`,
-  ].join("\n\n");
+  ].join("\n\n")
 }
 
-function formatUsageMarkdown(usage: any): string {
+function formatUsageMarkdown(usage: Usage): string {
   return [
     `💰 **$${usage?.cost.total.toFixed(6)}** · **${formatTokens(usage?.totalTokens || 0)} tokens**`,
     `**Input** ${formatTokens(usage?.input || 0)} **Output** ${formatTokens(usage?.output || 0)} **Reasoning** ${formatTokens(usage?.reasoning || 0)}`,
@@ -21,56 +23,56 @@ function formatUsageMarkdown(usage: any): string {
   ].join("\n\n")
 }
 
-export default function (pi: any) {
-  console.error("[pi-usage] loaded");
+export default function (pi: ExtensionAPI) {
+  console.error("[pi-usage] loaded")
 
-  const usageFile = process.env.PI_USAGE_FILE;
-  const usageStdout = process.env.PI_USAGE_STDOUT === "1";
-  const usageMarkdown = process.env.PI_USAGE_MARKDOWN === "1";
-  let modelId: string | undefined;
-  let sessId: string | undefined;
+  const usageFile = process.env.PI_USAGE_FILE
+  const usageStdout = process.env.PI_USAGE_STDOUT === "1"
+  const usageMarkdown = process.env.PI_USAGE_MARKDOWN === "1"
+  let modelId: string | undefined
+  let sessId: string | undefined
 
   if (!usageFile && !usageStdout) {
-    return;
+    return
   }
 
   if (usageFile) {
-    console.error(`[pi-usage] file enabled: ${usageFile}`);
+    console.error(`[pi-usage] file enabled: ${usageFile}`)
   }
 
   if (usageStdout) {
-    console.error("[pi-usage] stdout enabled");
+    console.error("[pi-usage] stdout enabled")
   }
 
-  let lastUsage: any = null;
+  let lastUsage: Usage | null = null
 
-  pi.on("message_end", (event: any, ctx: any) => {
-    modelId = ctx?.model?.id;
-    sessId = ctx.sessionManager?.sessionId;
+  pi.on("message_end", (event, ctx: ExtensionContext) => {
+    modelId = ctx?.model?.id
+    sessId = ctx.sessionManager?.sessionId
 
-    const message = event.message;
+    const message = event.message
 
     if (message.role === "assistant" && message.usage) {
-      lastUsage = message.usage;
+      lastUsage = message.usage
     }
-  });
+  })
 
   process.on("exit", () => {
-    if (!lastUsage) return;
+    if (!lastUsage) return
 
     if (usageFile) {
-      writeFileSync(usageFile, JSON.stringify(lastUsage, null, 2));
+      writeFileSync(usageFile, JSON.stringify(lastUsage, null, 2))
     }
 
     if (usageStdout) {
-      let output = "";
+      let output = ""
       if (usageMarkdown) {
-        output = "\n---\n" + formatUsageMarkdown(lastUsage);
-        console.log(output + (modelId ? `\n\n**Model** \`${modelId}\`` + (sessId ? `\n\n**Session** \`${sessId}\`` : "") : ""));
+        output = "\n---\n" + formatUsageMarkdown(lastUsage)
+        console.log(output + (modelId ? `\n\n**Model** \`${modelId}\`` + (sessId ? `\n\n**Session** \`${sessId}\`` : "") : ""))
       } else {
-        output = "\n\n" + formatUsageText(lastUsage);
-        console.log(output + (modelId ? `\n\nModel ${modelId}` + (sessId ? `\n\nSession ${sessId}` : "") : ""));
+        output = "\n\n" + formatUsageText(lastUsage)
+        console.log(output + (modelId ? `\n\nModel ${modelId}` + (sessId ? `\n\nSession ${sessId}` : "") : ""))
       }
     }
-  });
+  })
 }
