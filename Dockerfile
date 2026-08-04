@@ -15,18 +15,29 @@ RUN PKG="$(npm root -g)/@earendil-works/pi-coding-agent" \
     "$PKG/node_modules/@opentelemetry" \
     && npm cache clean --force
 
+FROM cgr.dev/chainguard/wolfi-base AS extension
+
+RUN apk add --no-cache curl upx
+
+# Install RTK
+RUN curl -fsSL https://raw.githubusercontent.com/rtk-ai/rtk/refs/heads/master/install.sh | sh
+
+# Compress binary
+RUN upx --best --lzma /root/.local/bin/rtk
+
 FROM cgr.dev/chainguard/wolfi-base AS runtime
 
 RUN apk add --no-cache nodejs-24-minimal bash ca-certificates tzdata fontconfig fd ripgrep
 
 WORKDIR /workspace
 
-ENV PATH="/usr/local/lib/node_modules/npm/bin:${PATH}"
+ENV PATH="/usr/local/lib/node_modules/npm/bin:/usr/local/bin:${PATH}"
 ENV TZ=UTC
 ENV LANG=C.UTF-8
 ENV LC_ALL=C.UTF-8
 
 COPY prompts/AGENTS.md prompts/README.md /workspace/
+COPY --from=extension /root/.local/bin/rtk /usr/local/bin/rtk
 
 RUN ln -s /usr/local/lib/node_modules /usr/bin/node_modules
 
@@ -34,7 +45,8 @@ FROM runtime AS pi-base
 
 COPY --from=base /usr/local/lib/node_modules /usr/local/lib/node_modules
 
-RUN ln -sf /usr/local/lib/node_modules/@earendil-works/pi-coding-agent/dist/cli.js /usr/sbin/pi
+RUN ln -sf /usr/local/lib/node_modules/@earendil-works/pi-coding-agent/dist/cli.js /usr/sbin/pi \
+    && rtk init -g --agent pi
 
 ENTRYPOINT ["pi"]
 
@@ -44,6 +56,7 @@ COPY skills/mcp /root/.pi/agent/skills/mcp
 COPY --from=base /usr/local/lib/node_modules /usr/local/lib/node_modules
 COPY --from=base /root/.pi/agent/npm /root/.pi/agent/npm
 
-RUN ln -sf /usr/local/lib/node_modules/@earendil-works/pi-coding-agent/dist/cli.js /usr/sbin/pi
+RUN ln -sf /usr/local/lib/node_modules/@earendil-works/pi-coding-agent/dist/cli.js /usr/sbin/pi \
+    && rtk init -g --agent pi
 
 ENTRYPOINT ["pi"]
