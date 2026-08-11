@@ -10,12 +10,6 @@ declare namespace NodeJS {
 }
 
 declare module "node:fs" {
-  export interface WriteFileOptions {
-    encoding?: string | null
-    mode?: number
-    flag?: string
-  }
-
   export function writeFileSync(
     file: string,
     data: string,
@@ -71,6 +65,7 @@ declare module "@earendil-works/pi-coding-agent" {
   }
 
   export interface ExtensionAPI {
+    registerProvider(name: string, config: ProviderConfig): void
     on(event: "agent_start" | "agent_settled", handler: (event: {}, ctx: ExtensionContext) => void): void
     on(
       event: "turn_start",
@@ -110,5 +105,38 @@ declare module "@earendil-works/pi-coding-agent" {
         ctx: ExtensionContext,
       ) => void,
     ): void
+  }
+
+  export type ProviderApi =
+    | "anthropic-messages"
+    | "openai-completions"
+    | "openai-responses"
+    | "azure-openai-responses"
+    | "openai-codex-responses"
+    | "mistral-conversations"
+    | "google-generative-ai"
+    | "google-vertex"
+    | "bedrock-converse-stream"
+
+  export interface ProviderConfig {
+    baseUrl: string
+    apiKey?: string
+    api: ProviderApi
+    models: ProviderModelConfig[]
+  }
+
+  export interface ProviderModelConfig {
+    id: string
+    name: string
+    reasoning: boolean
+    input: string[]
+    cost: {
+      input: number
+      output: number
+      cacheRead: number
+      cacheWrite: number
+    }
+    contextWindow: number
+    maxTokens: number
   }
 }
