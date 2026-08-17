@@ -7,48 +7,37 @@ description: Provides access to external capabilities exposed through MCP server
 
 ## Purpose
 
-This skill defines how to use MCP-based external tools that are already configured and exposed by the runtime MCP adapter.
+This skill defines how to use external capabilities provided by configured MCP servers. The runtime may expose each discovered MCP capability as a normal tool, with names determined by the active MCP integration and its configuration.
 
-MCP servers are plugins that extend the agent's capabilities.
-
-The runtime exposes one MCP proxy tool named `mcp`. This skill does not install packages or create MCP servers.
+Do not infer tool names from an extension, server, prefix, or naming convention. Registered names may be customized, sanitized, or suffixed to avoid collisions; always use the exact tool name exposed by the runtime.
 
 ## Usage
 
 When a task requires an external capability:
 
-1. Search the available MCP tools with the runtime `mcp` tool.
-2. Describe an unfamiliar tool and inspect its schema.
-3. Call the selected tool with the exact JSON-string argument format.
-4. Return the result and report tool errors clearly.
+1. Look for an available runtime tool whose description identifies it as the required MCP capability.
+2. Read the tool description and input schema before calling an unfamiliar tool.
+3. Call that registered tool directly with a JSON object that conforms to its schema. Do not wrap the request in `{ "tool": ..., "args": ... }` and do not JSON-stringify its arguments.
+4. Use the tool result directly. Preserve structured results when they are needed by a later tool call, and clearly report tool-level errors.
 
-## Runtime MCP Calls
+## Availability And Recovery
 
-Use these forms:
-
-```json
-{"search":"screenshot navigate"}
-```
-
-```json
-{"describe":"server_tool_name"}
-```
-
-```json
-{"tool":"server_tool_name","args":"{\"key\":\"value\"}"}
-```
-
-The `args` field is a JSON string, not a nested JSON object. Use the actual runtime `mcp` tool for these calls; do not run `npx`, `npm`, or install MCP packages from the agent.
+- Do not invent an MCP tool, server, name, or parameter. A configured server may be unavailable, reconnecting, or use `lazy` lifecycle.
+- If the required MCP tool is not exposed, use `/mcp` to inspect all server statuses. Use `/mcp <name>` for a server's status and stderr log.
+- Start a stopped lazy server with `/mcp:start <name>`; stop a server only when the task explicitly requires it.
+- If a direct tool call reports a connection or timeout error, inspect its server with `/mcp <name>`. Retry only when the operation is safe to repeat; do not automatically repeat non-idempotent or destructive operations.
+- Tool availability can refresh while the session is running. After a successful recovery, inspect the currently exposed MCP tools again and use their exact names and schemas.
 
 ## Rules
 
-- Only use MCP capabilities exposed by the runtime MCP adapter and follow this skill.
-- Do not assume MCP servers or tools exist.
-- Search or inspect unfamiliar tools before use.
-- Follow tool schemas exactly.
+- Only use MCP capabilities exposed as registered runtime tools and follow this skill.
+- Do not install MCP packages, run `npx` or `npm`, or create/change MCP server configuration unless the user explicitly requests it.
+- Follow each exposed tool schema exactly, including required fields and value types.
+- Respect the tool's safety annotations and description. Confirm intent before destructive actions when the request is ambiguous.
+- Do not use MCP tools that require a GUI, browser window, or interactive session in this headless runtime.
 
-## MCP Providers
+## Server Lifecycle
 
-MCP providers are configured by the runtime and may be lazy-loaded on first use. A configured server may still be unavailable if its process, credentials, or network dependencies are missing.
+MCP servers are configured by the runtime and may be started eagerly or lazily. The extension discovers tools on connection, refreshes them when a server announces a change, and deactivates them when the server disconnects.
 
-Available providers are discovered at runtime.
+Available tools and their schemas are discovered at runtime.

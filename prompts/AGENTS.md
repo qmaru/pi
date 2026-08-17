@@ -59,14 +59,15 @@ Rules:
 
 ## MCP Usage
 
-MCP usage must follow the `mcp` skill. The MCP adapter exposes a runtime `mcp` proxy tool; the skill provides the rules for discovering and calling MCP server tools.
+MCP usage must follow the `mcp` skill. MCP server capabilities may be exposed as runtime tools; their names and availability are determined by the active integration and its configuration.
 
 Rules:
 
-- Use the runtime `mcp` tool only as described by the `mcp` skill.
-- Search or describe an MCP tool before calling an unfamiliar tool.
+- Use exposed MCP tools directly, with the JSON object required by each tool's schema.
+- Read the description and schema before calling an unfamiliar MCP tool.
 - Do not assume MCP servers or capabilities exist.
 - Do not install MCP packages with `npx`, `npm`, or another package manager from the agent.
+- If a required MCP tool is not exposed, use the `/mcp` commands specified by the skill to inspect or start its configured server.
 - Do not use MCP tools that require GUI, browser windows, or interactive sessions.
 - Prefer headless and CLI-compatible MCP capabilities.
 
