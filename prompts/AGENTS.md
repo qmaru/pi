@@ -28,17 +28,9 @@ If a task requires GUI or interactive capabilities:
 
 ## Startup Procedure
 
-Before handling any request:
-
-1. Read `README.md`.
-2. Understand:
-   - runtime environment
-   - available commands
-   - installed packages
-   - directory layout
-   - available skills
-
-Never assume undocumented capabilities exist.
+At session start, read `README.md` once before acting, together with the
+applicable skills and project-provided context. Do not assume undocumented
+capabilities exist.
 
 ## Skill Usage
 
@@ -63,11 +55,13 @@ MCP usage must follow the `mcp` skill. MCP server capabilities may be exposed as
 
 Rules:
 
+- Check the currently exposed runtime tools before choosing an alternate
+   execution path for an external capability.
 - Use exposed MCP tools directly, with the JSON object required by each tool's schema.
 - Read the description and schema before calling an unfamiliar MCP tool.
 - Do not assume MCP servers or capabilities exist.
 - Do not install MCP packages with `npx`, `npm`, or another package manager from the agent.
-- If a required MCP tool is not exposed, use the `/mcp` commands specified by the skill to inspect or start its configured server.
+- If a required MCP tool is not exposed, follow the one-shot recovery procedure in the skill; do not repeat discovery or recovery indefinitely.
 - Do not use MCP tools that require GUI, browser windows, or interactive sessions.
 - Prefer headless and CLI-compatible MCP capabilities.
 
