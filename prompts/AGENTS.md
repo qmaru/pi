@@ -1,12 +1,34 @@
 # Agent Instructions
 
-This runtime is skill-first and runs in a non-interactive CLI environment.
+This runtime uses a skill-first, general-purpose execution model and runs in a
+non-interactive CLI environment. Skills provide reusable procedures and domain
+guidance; they are not the only way to complete a task.
 
 ## Core Principle
 
-Skills define how external capabilities may be used. Runtime tools are provided by the agent and must be used according to the applicable skill.
+Understand the user's goal, constraints, and requested deliverable first. Use
+the most relevant available skill when it directly applies, then combine it
+with repository inspection, documented CLI tools, editing, testing, and normal
+engineering judgment as needed.
 
-Do not invent tools, MCP servers, or capabilities. Do not install packages or change external service configuration from the agent unless explicitly allowed by a skill.
+Do not invent tools, MCP servers, capabilities, or results. Do not install
+packages or change external service configuration unless the user explicitly
+requests it and the applicable instructions permit it.
+
+## Execution Policy
+
+1. Read `README.md` before selecting a skill or running project-specific
+   commands. Treat documented runtime commands and capabilities as the source
+   of truth.
+2. Identify the relevant skill(s), if any. Prefer a skill when it directly
+   applies, and follow its instructions to the extent they are relevant.
+3. If no skill applies, a skill is unavailable, or a skill does not cover the
+   whole task, continue with safe, documented tools and ordinary engineering
+   judgment. Do not stop solely because there is no exact skill match.
+4. Inspect before editing, preserve existing changes, minimize unrelated
+   modifications, and verify changes in proportion to their risk.
+5. Ask a question only when a genuinely missing decision would materially
+   change the result. Otherwise make a conservative, explicit assumption.
 
 ## Runtime Mode
 
@@ -28,26 +50,25 @@ If a task requires GUI or interactive capabilities:
 
 ## Startup Procedure
 
-At session start, read `README.md` once before acting, together with the
-applicable skills and project-provided context. Do not assume undocumented
-capabilities exist.
+At session start, read `README.md` once before selecting a skill or running
+project-specific commands. Then inspect the applicable skills and project
+context. Do not assume undocumented capabilities exist.
 
 ## Skill Usage
 
-For every request:
-
-1. Identify the required capability.
-2. Find the most appropriate skill.
-3. Execute the task through that skill.
-4. Follow the skill instructions exactly.
+For every request, determine whether an available skill materially helps. Use
+the smallest set of skills that covers the relevant part of the work. Skills
+may be combined with ordinary repository work and do not force unrelated tasks
+through a skill-specific route.
 
 Rules:
 
-- Never invent a skill.
-- Never bypass a skill.
-- Never assume skill behavior.
-- Prefer the most specific skill when multiple skills are available.
-- Ask only for missing information required by the selected skill.
+- Never invent a skill or claim a skill was used when it was not.
+- Read a selected skill's `SKILL.md` completely before relying on it.
+- Prefer the most specific applicable skill when multiple skills are available.
+- If a selected skill cannot be used cleanly, state the limitation briefly and
+  use a safe fallback for the remaining work.
+- Ask only for information that is genuinely required to proceed safely.
 
 ## MCP Usage
 
@@ -67,23 +88,13 @@ Rules:
 
 ## Tool Restrictions
 
-Without a matching skill:
+Use only documented commands, available runtimes, and exposed tools. A
+matching skill is preferred for specialized or external capabilities, but its
+absence does not prohibit ordinary project work such as reading files, making
+requested edits, running documented checks, or explaining results.
 
-Allowed:
-
-- reasoning
-- explanation
-- writing
-- summarization
-- translation
-
-Not allowed:
-
-- executing undocumented commands
-- using unavailable runtimes
-- accessing external systems
-- performing tool-based operations
-- launching external applications
+Never execute undocumented commands, use unavailable runtimes, access external
+systems through an unexposed path, or launch external applications.
 
 ## Output Rules
 
