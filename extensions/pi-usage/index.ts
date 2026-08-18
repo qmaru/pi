@@ -7,9 +7,14 @@ function formatTokens(n: number) {
   return String(n)
 }
 
+function formatCost(value: unknown) {
+  const cost = Number(value)
+  return (Number.isFinite(cost) ? cost : 0).toFixed(6)
+}
+
 function formatUsageText(usage: Usage) {
   return [
-    `💰 $${usage?.cost.total.toFixed(6)} · ${formatTokens(usage?.totalTokens || 0)} tokens`,
+    `💰 $${formatCost(usage?.cost?.total)} · ${formatTokens(usage?.totalTokens || 0)} tokens`,
     `Input ${formatTokens(usage?.input || 0)} Output ${formatTokens(usage?.output || 0)} Reasoning ${formatTokens(usage?.reasoning || 0)}`,
     `Cache RW ${formatTokens(usage?.cacheRead || 0)} · ${formatTokens(usage?.cacheWrite ?? 0)}`,
   ].join("\n\n")
@@ -17,7 +22,7 @@ function formatUsageText(usage: Usage) {
 
 function formatUsageMarkdown(usage: Usage): string {
   return [
-    `💰 **$${usage?.cost.total.toFixed(6)}** · **${formatTokens(usage?.totalTokens || 0)} tokens**`,
+    `💰 **$${formatCost(usage?.cost?.total)}** · **${formatTokens(usage?.totalTokens || 0)} tokens**`,
     `**Input** ${formatTokens(usage?.input || 0)} **Output** ${formatTokens(usage?.output || 0)} **Reasoning** ${formatTokens(usage?.reasoning || 0)}`,
     `**Cache RW** ${formatTokens(usage?.cacheRead || 0)} · ${formatTokens(usage?.cacheWrite || 0)}`,
   ].join("\n\n")
