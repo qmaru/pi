@@ -28,23 +28,24 @@ env:
 
 jobs:
   check:
-    name: Check npm version
+    name: Check pi version
     runs-on: ubuntu-latest
 
     outputs:
       update_needed: ${{ steps.compare.outputs.update_needed }}
+      version: ${{ steps.pi_version.outputs.version }}
 
     steps:
       - uses: actions/checkout@v7
 
-      - name: Restore npm version cache
+      - name: Restore pi version cache
         uses: actions/cache/restore@v6
         with:
           path: .pi_version
           key: pi-version
 
-      - name: Get npm version
-        id: npm
+      - name: Get pi version
+        id: pi_version
         run: |
           VERSION=$(npm view @earendil-works/pi-coding-agent version)
 
@@ -59,11 +60,11 @@ jobs:
             PREV_VERSION=$(cat .pi_version)
           fi
 
-          if [ "$PREV_VERSION" = "${{ steps.npm.outputs.version }}" ]; then
+            if [ "$PREV_VERSION" = "${{ steps.pi_version.outputs.version }}" ]; then
             echo "update_needed=false" >> "$GITHUB_OUTPUT"
           else
             echo "update_needed=true" >> "$GITHUB_OUTPUT"
-            echo "${{ steps.npm.outputs.version }}" > .pi_version
+              echo "${{ steps.pi_version.outputs.version }}" > .pi_version
           fi
 
       - name: Save version cache
@@ -109,6 +110,7 @@ jobs:
           target: pi-base
           tags: |
             ${{ env.IMAGE }}:base
+            ${{ env.IMAGE }}:base-${{ needs.check.outputs.version }}
           push: true
 
       - name: Build and push latest
@@ -121,12 +123,15 @@ jobs:
           platforms: linux/amd64,linux/arm64
           target: pi-full
           tags: |
+            ${{ env.IMAGE }}:${{ needs.check.outputs.version }}
             ${{ env.IMAGE }}:latest
           push: true
 
       - name: Verify image
         run: |
           docker buildx imagetools inspect $IMAGE:base
+          docker buildx imagetools inspect $IMAGE:base-${{ needs.check.outputs.version }}
+          docker buildx imagetools inspect $IMAGE:${{ needs.check.outputs.version }}
           docker buildx imagetools inspect $IMAGE:latest
 
   skipped:
