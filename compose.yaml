@@ -11,5 +11,6 @@ services:
       - ./examples/settings.json:/root/.pi/agent/settings.json
       - ./examples/mcp.json:/root/.pi/agent/mcp.json
       - ./extensions/pi-usage:/root/.pi/agent/extensions/pi-usage
+      - ./extensions/pi-event:/root/.pi/agent/extensions/pi-event
     entrypoint:
       - pi

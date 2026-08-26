@@ -47,6 +47,7 @@ declare module "@earendil-works/pi-coding-agent" {
     message: {
       role: string
       usage?: Usage
+      content?: string | Array<{ type?: string; text?: string }>
     }
   }
 
