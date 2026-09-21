@@ -9,6 +9,7 @@ This is a lightweight pi agent.
 - BusyBox utilities
 - Node.js 24
 - npm 11 / npx 11
+- curl / jq
 
 ## default skill
 

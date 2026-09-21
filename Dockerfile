@@ -2,8 +2,6 @@ FROM node:24-trixie AS base
 
 WORKDIR /src
 
-RUN apt update && apt install -y curl upx
-
 RUN npm install -g --ignore-scripts @earendil-works/pi-coding-agent \
     && pi install npm:pi-mcp-extension
 
@@ -17,13 +15,9 @@ RUN PKG="$(npm root -g)/@earendil-works/pi-coding-agent" \
     "$PKG/node_modules/@opentelemetry" \
     && npm cache clean --force
 
-RUN curl -fsSL https://raw.githubusercontent.com/rtk-ai/rtk/refs/heads/master/install.sh | sh
-
-RUN upx --best --lzma /root/.local/bin/rtk
-
 FROM cgr.dev/chainguard/wolfi-base AS runtime
 
-RUN apk add --no-cache nodejs-24-minimal bash ca-certificates tzdata fontconfig fd ripgrep
+RUN apk add --no-cache nodejs-24-minimal curl jq bash ca-certificates tzdata fontconfig fd ripgrep
 
 WORKDIR /workspace
 
@@ -36,13 +30,11 @@ ENV PATH="/usr/local/lib/node_modules/npm/bin:/usr/local/bin:${PATH}" \
     NPM_CONFIG_FUND=false
 
 COPY --from=base /usr/local/lib/node_modules /usr/local/lib/node_modules
-COPY --from=base /root/.local/bin/rtk /usr/local/bin/rtk
 
 COPY prompts/AGENTS.md prompts/README.md .
 
 RUN ln -sf /usr/local/lib/node_modules /usr/bin/node_modules \
-    && ln -sf /usr/local/lib/node_modules/@earendil-works/pi-coding-agent/dist/cli.js /usr/sbin/pi \
-    && rtk init -g --agent pi
+    && ln -sf /usr/local/lib/node_modules/@earendil-works/pi-coding-agent/dist/cli.js /usr/sbin/pi
 
 FROM runtime AS pi-base
 
