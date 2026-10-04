@@ -2,8 +2,7 @@ FROM node:24-trixie AS base
 
 WORKDIR /src
 
-RUN npm install -g --ignore-scripts @earendil-works/pi-coding-agent \
-    && pi install npm:pi-mcp-extension
+RUN npm install -g --ignore-scripts @earendil-works/pi-coding-agent
 
 RUN PKG="$(npm root -g)/@earendil-works/pi-coding-agent" \
     && find "$PKG" -type f \( -name "*.map" -o -name "*.d.ts" \) -delete \
@@ -36,14 +35,6 @@ COPY prompts/AGENTS.md prompts/README.md .
 RUN ln -sf /usr/local/lib/node_modules /usr/bin/node_modules \
     && ln -sf /usr/local/lib/node_modules/@earendil-works/pi-coding-agent/dist/cli.js /usr/sbin/pi
 
-FROM runtime AS pi-base
-
-ENTRYPOINT ["pi"]
-
-FROM runtime AS pi-full
-
-COPY --from=base /root/.pi/agent/npm /root/.pi/agent/npm
-
-COPY skills/mcp /root/.pi/agent/skills/mcp
+FROM runtime AS pi
 
 ENTRYPOINT ["pi"]
