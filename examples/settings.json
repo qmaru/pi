@@ -1,7 +1,4 @@
 {
-  "defaultProjectTrust": "always",
-  "quietStartup": true,
-  "packages": [
-    "npm:pi-mcp-extension"
-  ]
+  "$schema": "https://pi.dev/schemas/settings.schema.json",
+  "quietStartup": true
 }
