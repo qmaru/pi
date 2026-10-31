@@ -2,7 +2,9 @@ FROM node:24-trixie AS base
 
 WORKDIR /src
 
-RUN npm install -g --ignore-scripts @earendil-works/pi-coding-agent
+ARG PI_VERSION=latest
+
+RUN npm install -g --ignore-scripts @earendil-works/pi-coding-agent@${PI_VERSION}
 
 RUN PKG="$(npm root -g)/@earendil-works/pi-coding-agent" \
     && test -d "$PKG" || { echo "ERROR: package not found: $PKG"; exit 1; } \

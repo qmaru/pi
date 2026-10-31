@@ -38,18 +38,20 @@ jobs:
     steps:
       - uses: actions/checkout@v7
 
-      - name: Restore pi version cache
-        uses: actions/cache/restore@v6
-        with:
-          path: .pi_version
-          key: pi-version
-
       - name: Get pi version
         id: pi_version
         run: |
           VERSION=$(npm view @earendil-works/pi-coding-agent version)
 
           echo "version=$VERSION" >> "$GITHUB_OUTPUT"
+
+      - name: Restore pi version cache
+        uses: actions/cache/restore@v6
+        with:
+          path: .pi_version
+          key: pi-version-${{ steps.pi_version.outputs.version }}
+          restore-keys: |
+            pi-version-
 
       - name: Compare version
         id: compare
@@ -60,19 +62,11 @@ jobs:
             PREV_VERSION=$(cat .pi_version)
           fi
 
-            if [ "$PREV_VERSION" = "${{ steps.pi_version.outputs.version }}" ]; then
+          if [ "$PREV_VERSION" = "${{ steps.pi_version.outputs.version }}" ]; then
             echo "update_needed=false" >> "$GITHUB_OUTPUT"
           else
             echo "update_needed=true" >> "$GITHUB_OUTPUT"
-              echo "${{ steps.pi_version.outputs.version }}" > .pi_version
           fi
-
-      - name: Save version cache
-        if: steps.compare.outputs.update_needed == 'true'
-        uses: actions/cache/save@v6
-        with:
-          path: .pi_version
-          key: pi-version
 
   build:
     name: Build and push
@@ -107,6 +101,8 @@ jobs:
           no-cache: ${{ github.event_name == 'workflow_dispatch' && inputs.force }}
           context: .
           platforms: linux/amd64,linux/arm64
+          build-args: |
+            PI_VERSION=${{ needs.check.outputs.version }}
           tags: |
             ${{ env.IMAGE }}:${{ needs.check.outputs.version }}
             ${{ env.IMAGE }}:latest
@@ -116,6 +112,17 @@ jobs:
         run: |
           docker buildx imagetools inspect $IMAGE:${{ needs.check.outputs.version }}
           docker buildx imagetools inspect $IMAGE:latest
+
+      - name: Prepare pi version cache
+        if: needs.check.outputs.update_needed == 'true'
+        run: echo "${{ needs.check.outputs.version }}" > .pi_version
+
+      - name: Save pi version cache
+        if: success() && needs.check.outputs.update_needed == 'true'
+        uses: actions/cache/save@v6
+        with:
+          path: .pi_version
+          key: pi-version-${{ needs.check.outputs.version }}
 
   skipped:
     name: Skip
